@@ -100,8 +100,8 @@ function Register() {
           />
           <Box sx={{ mt: 2 }} />
           <Typography variant="body2" color="textSecondary" align="center">
-            Al registrarte, aceptas nuestras Condiciones de uso y Política de
-            privacidad.
+            Al registrarte, aceptas nuestras Condiciones de uso y{' '}
+            <Link to="/privacy-policy">Política de privacidad</Link>.
           </Typography>
           <Box sx={{ mt: 2 }} />
           <Typography variant="body2" color="textSecondary" align="center">

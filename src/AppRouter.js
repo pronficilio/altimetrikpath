@@ -7,6 +7,7 @@ import theme from './theme';
 import Register from './components/Register';
 import Login from './components/Login';
 import Profile from './components/Profile';
+import PrivacyPolicy from './components/PrivacyPolicy';
 
 function AppRouter() {
   return (
@@ -17,6 +18,7 @@ function AppRouter() {
           <Route path="/" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Routes>
       </Router>
     </ThemeProvider>
