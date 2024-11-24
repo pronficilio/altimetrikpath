@@ -5,7 +5,7 @@ dotenv.config();
 
 module.exports = function (req, res, next) {
   // Obtener el token del header
-  const token = req.header('x-auth-token');
+  const token = req.header('Authorization').replace('Bearer ', '');
 
   // Verificar si no hay token
   if (!token) {

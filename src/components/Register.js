@@ -9,9 +9,10 @@ import {
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Register() {
+  const navigate = useNavigate();
   const formik = useFormik({
     initialValues: {
       name: '',
@@ -31,10 +32,12 @@ function Register() {
       axios
         .post('http://localhost:5000/api/users', values)
         .then((response) => {
-          console.log('Usuario registrado:', response.data);
+          const token = response.data.token; // JWT recibido
+          localStorage.setItem('token', token); // Guardar token en localStorage
+          navigate('/profile'); // Redirigir al perfil
         })
         .catch((error) => {
-          console.error('Error al registrar el usuario:', error);
+          console.error('Error al registrarse:', error.response?.data || error.message);
         }); 
     },
   });

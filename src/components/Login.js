@@ -29,14 +29,21 @@ function Login() {
         .required('Campo requerido'),
     }),
     onSubmit: (values) => {
+      console.log("Iniciando sesión con:", values);
       // Lógica para manejar el inicio de sesión
       axios
         .post('http://localhost:5000/api/auth/login', values)
         .then((response) => {
-          // Guardar el token y redirigir al perfil
+          const token = response.data.token; // Obtener el token
+          localStorage.setItem('token', token); // Guardar el token
+          navigate('/profile'); // Redirigir al perfil
         })
         .catch((error) => {
-          console.error('Error al iniciar sesión:', error);
+          console.error(
+            'Error al iniciar sesión:',
+            error.response?.data || error.message
+          );
+          alert(error.response?.data?.msg || 'Error al iniciar sesión');
         });
     },
   });

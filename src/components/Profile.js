@@ -9,7 +9,11 @@ function Profile() {
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/api/auth')
+      .get('http://localhost:5000/api/auth', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        }
+      })
       .then((response) => {
         setUser(response.data);
       })
