@@ -9,17 +9,18 @@ import {
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
-function Register() {
+function Login() {
+  const navigate = useNavigate();
+
   const formik = useFormik({
     initialValues: {
-      name: '',
       email: '',
       password: '',
     },
     validationSchema: Yup.object({
-      name: Yup.string().required('Campo requerido'),
       email: Yup.string()
         .email('Email inválido')
         .required('Campo requerido'),
@@ -28,14 +29,15 @@ function Register() {
         .required('Campo requerido'),
     }),
     onSubmit: (values) => {
+      // Lógica para manejar el inicio de sesión
       axios
-        .post('http://localhost:3001/users', values)
+        .post('http://localhost:5000/api/auth/login', values)
         .then((response) => {
-          console.log('Usuario registrado:', response.data);
+          // Guardar el token y redirigir al perfil
         })
         .catch((error) => {
-          console.error('Error al registrar el usuario:', error);
-        }); 
+          console.error('Error al iniciar sesión:', error);
+        });
     },
   });
 
@@ -51,60 +53,32 @@ function Register() {
         }}
       >
         <Typography component="h1" variant="h5" align="center" gutterBottom>
-          Registro
+          Iniciar Sesión
         </Typography>
         <form onSubmit={formik.handleSubmit} noValidate>
           <TextField
             margin="normal"
-            required
-            fullWidth
-            id="name"
-            label="Nombre"
-            name="name"
-            value={formik.values.name}
-            onChange={formik.handleChange}
-            error={formik.touched.name && Boolean(formik.errors.name)}
-            helperText={formik.touched.name && formik.errors.name}
-            autoComplete="name"
-            autoFocus
-          />
-          <TextField
-            margin="normal"
-            required
             fullWidth
             id="email"
-            label="Correo Electrónico"
             name="email"
+            label="Correo Electrónico"
             value={formik.values.email}
             onChange={formik.handleChange}
             error={formik.touched.email && Boolean(formik.errors.email)}
             helperText={formik.touched.email && formik.errors.email}
-            autoComplete="email"
           />
           <TextField
             margin="normal"
-            required
             fullWidth
             name="password"
+            label="Contraseña"
+            type="password"
+            id="password"
             value={formik.values.password}
             onChange={formik.handleChange}
             error={formik.touched.password && Boolean(formik.errors.password)}
             helperText={formik.touched.password && formik.errors.password}
-            label="Contraseña"
-            type="password"
-            id="password"
-            autoComplete="new-password"
           />
-          <Box sx={{ mt: 2 }} />
-          <Typography variant="body2" color="textSecondary" align="center">
-            Al registrarte, aceptas nuestras Condiciones de uso y Política de
-            privacidad.
-          </Typography>
-          <Box sx={{ mt: 2 }} />
-          <Typography variant="body2" color="textSecondary" align="center">
-            ¿Ya tienes una cuenta? <Link to="/login">Inicia sesión</Link>
-          </Typography>
-          <Box sx={{ mt: 2 }} />
           <Button
             type="submit"
             fullWidth
@@ -112,12 +86,16 @@ function Register() {
             color="primary"
             sx={{ mt: 3 }}
           >
-            Registrarse
+            Iniciar Sesión
           </Button>
+          <Box sx={{ mt: 2 }} />
+          <Typography variant="body2" align="center">
+            ¿No tienes una cuenta? <Link to="/">Regístrate</Link>
+          </Typography>
         </form>
       </Box>
     </Container>
   );
 }
 
-export default Register;
+export default Login;
