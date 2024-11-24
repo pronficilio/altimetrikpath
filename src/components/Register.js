@@ -29,7 +29,7 @@ function Register() {
     }),
     onSubmit: (values) => {
       axios
-        .post('http://localhost:3001/users', values)
+        .post('http://localhost:5000/api/users', values)
         .then((response) => {
           console.log('Usuario registrado:', response.data);
         })
