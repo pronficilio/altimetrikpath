@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const dotenv = require('dotenv');
+const auth = require('../middleware/auth');
 
 dotenv.config();
 
@@ -46,6 +47,23 @@ router.post('/', async (req, res) => {
         res.json({ token });
       }
     );
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
+// Actualizar Usuario
+router.put('/', auth, async (req, res) => {
+  const { name, email } = req.body;
+  try {
+    console.log(req.user.id);
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { name, email },
+      { new: true }
+    ).select('-password');
+    res.json(user);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Error en el servidor');
