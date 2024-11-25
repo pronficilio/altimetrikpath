@@ -10,39 +10,50 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 
 function Profile() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const [editOpen, setEditOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
   const handleEditOpen = () => setEditOpen(true);
   const handleEditClose = () => setEditOpen(false);
   const handlePasswordOpen = () => setPasswordOpen(true);
   const handlePasswordClose = () => setPasswordOpen(false);
 
-  const handlePasswordChange = (event) => {
-    event.preventDefault();
-    axios
-      .put(
-        'http://localhost:5000/api/auth/password',
-        { currentPassword, newPassword },
-        {
+  const formik = useFormik({
+    initialValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmNewPassword: '',
+    },
+    validationSchema: Yup.object({
+      currentPassword: Yup.string().required('Campo requerido'),
+      newPassword: Yup.string()
+        .min(6, 'Mínimo 6 caracteres')
+        .required('Campo requerido'),
+      confirmNewPassword: Yup.string()
+        .oneOf([Yup.ref('newPassword'), null], 'Las contraseñas no coinciden')
+        .required('Campo requerido'),
+    }),
+    onSubmit: (values) => {
+      axios
+        .put('http://localhost:5000/api/users/change-password', values, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           }
-        }
-      )
-      .then((response) => {
-        alert(response.data.msg);
-        setPasswordOpen(false);
-      })
-      .catch((error) => console.error(error));
-  };
+        })
+        .then((response) => {
+          console.log('Contraseña actualizada:', response.data);
+          alert(response.data.msg);
+          setPasswordOpen(false);
+        })
+        .catch((error) => console.error(error));
+    },
+  });
 
   const handleUpdate = (event) => {
     event.preventDefault();
@@ -125,33 +136,63 @@ function Profile() {
         <Modal open={passwordOpen} onClose={handlePasswordClose}>
           <Box sx={{ ...modalStyles }}>
             <Typography variant="h6">Cambiar Contraseña</Typography>
-            <form onSubmit={handlePasswordChange}>
+            <form onSubmit={formik.handleSubmit} noValidate>
               <TextField
                 fullWidth
                 margin="normal"
+                name="currentPassword"
                 label="Contraseña Actual"
                 type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                value={formik.values.currentPassword}
+                onChange={formik.handleChange}
+                error={
+                  formik.touched.currentPassword &&
+                  Boolean(formik.errors.currentPassword)
+                }
+                helperText={
+                  formik.touched.currentPassword && formik.errors.currentPassword
+                }
               />
               <TextField
                 fullWidth
                 margin="normal"
+                name="newPassword"
                 label="Nueva Contraseña"
                 type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                value={formik.values.newPassword}
+                onChange={formik.handleChange}
+                error={
+                  formik.touched.newPassword && Boolean(formik.errors.newPassword)
+                }
+                helperText={
+                  formik.touched.newPassword && formik.errors.newPassword
+                }
               />
               <TextField
                 fullWidth
                 margin="normal"
+                name="confirmNewPassword"
                 label="Confirmar Nueva Contraseña"
                 type="password"
-                value={confirmNewPassword}
-                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                value={formik.values.confirmNewPassword}
+                onChange={formik.handleChange}
+                error={
+                  formik.touched.confirmNewPassword &&
+                  Boolean(formik.errors.confirmNewPassword)
+                }
+                helperText={
+                  formik.touched.confirmNewPassword &&
+                  formik.errors.confirmNewPassword
+                }
               />
-              <Button type="submit" variant="contained" color="primary">
-                Guardar Cambios
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                sx={{ mt: 3 }}
+              >
+                Cambiar Contraseña
               </Button>
             </form>
           </Box>
