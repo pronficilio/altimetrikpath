@@ -7,6 +7,9 @@ import {
   Grid,
   Modal,
   TextField,
+  LinearProgress,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +21,12 @@ function Profile() {
   const navigate = useNavigate();
   const [editOpen, setEditOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   const handleEditOpen = () => setEditOpen(true);
   const handleEditClose = () => setEditOpen(false);
@@ -48,10 +57,22 @@ function Profile() {
         })
         .then((response) => {
           console.log('Contraseña actualizada:', response.data);
-          alert(response.data.msg);
+          setSnackbar({
+            open: true,
+            message: response.data.msg,
+            severity: 'success',
+          });
           setPasswordOpen(false);
+          formik.resetForm();
         })
-        .catch((error) => console.error(error));
+        .catch((error) => {
+          console.error('Error al cambiar la contraseña:', error);
+          setSnackbar({
+            open: true,
+            message: 'Error al cambiar la contraseña',
+            severity: 'error',
+          });
+        });
     },
   });
 
@@ -66,18 +87,87 @@ function Profile() {
       .then((response) => {
         setUser(response.data);
         handleEditClose();
+        setSnackbar({
+          open: true,
+          message: 'Información actualizada correctamente',
+          severity: 'success',
+        });
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {
+        console.error('Error al actualizar la información:', error);
+        setSnackbar({
+          open: true,
+          message: 'Error al actualizar la información',
+          severity: 'error',
+        });
+      });
   };
 
-  function handleFileChange(e) {
+  const uploadCV = (file) => {
+    const formData = new FormData();
+    formData.append('cv', file);
+    axios
+      .post('https://localhost:5443/api/users/upload-cv', formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setUploadProgress(percentCompleted);
+        }
+      })
+      .then((response) => {
+        console.log('CV subido:', response.data);
+        setUploadProgress(0);
+        setSnackbar({
+          open: true,
+          message: 'CV subido correctamente',
+          severity: 'success',
+        });
+      })
+      .catch((error) => {
+        console.error('Error al subir el CV:', error);
+        setUploadProgress(0);
+        setSnackbar({
+          open: true,
+          message: 'Error al subir el CV',
+          severity: 'error',
+        });
+      });
+  };
+
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file && (file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
-      console.log('Archivo válido', file);
-    } else {
-      alert('Sube un archivo PDF o DOCX.');
-    }
+    if (file) {
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+
+      if (!allowedTypes.includes(file.type)) {
+        alert('Tipo de archivo no permitido. Solo .pdf, .doc, .docx');
+        return;
+      }
+
+      if (file.size > maxSize) {
+        alert('El archivo supera el tamaño máximo de 5MB.');
+        return;
+      }
+
+      uploadCV(file);
+      e.target.value = '';
+    } 
   }
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
 
   useEffect(() => {
     axios
@@ -94,11 +184,6 @@ function Profile() {
         navigate('/login');
       });
   }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
 
   if (!user) {
     return <Typography>Cargando...</Typography>;
@@ -245,6 +330,27 @@ function Profile() {
           </Grid>
         </Grid>
       </Box>
+      {uploadProgress > 0 && (
+        <Box sx={{ width: '100%', mt: 2 }}>
+          <LinearProgress variant="determinate" value={uploadProgress} />
+          <Typography variant="body2" color="text.secondary">
+            Subiendo: {uploadProgress}%
+          </Typography>
+        </Box>
+      )}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={8000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
