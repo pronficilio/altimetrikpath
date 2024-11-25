@@ -5,6 +5,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const dotenv = require('dotenv');
 const auth = require('../middleware/auth');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 dotenv.config();
 
@@ -86,6 +89,55 @@ router.put('/change-password', auth, async (req, res) => {
     user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
     res.json({ msg: 'Contraseña actualizada correctamente' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
+// Configuración de almacenamiento y restricciones con multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${req.user.id}-${Date.now()}-${file.originalname}`);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Tipo de archivo no permitido'), false);
+  }
+};
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter,
+});
+
+// Ruta para subir el CV
+router.post('/upload-cv', auth, upload.single('cv'), async (req, res) => {
+  try {
+    // Guardar la ruta del archivo en el perfil del usuario
+    let user = await User.findById(req.user.id);
+    user.cv = req.file.path;
+    user.original_cv = req.file.originalname;
+    await user.save();
+
+    res.json({ msg: 'CV subido correctamente', path: req.file.path });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Error en el servidor');
