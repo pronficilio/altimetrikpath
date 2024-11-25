@@ -59,6 +59,15 @@ function Profile() {
       .catch((error) => console.error(error));
   };
 
+  function handleFileChange(e) {
+    const file = e.target.files[0];
+    if (file && (file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+      console.log('Archivo válido', file);
+    } else {
+      alert('Sube un archivo PDF o DOCX.');
+    }
+  }
+
   useEffect(() => {
     axios
       .get('http://localhost:5000/api/auth', {
@@ -108,6 +117,10 @@ function Profile() {
         </Button>
         <Button variant="contained" onClick={handlePasswordOpen} sx={{ mt: 2 }}>
           Cambiar Contraseña
+        </Button>
+        <Button variant="contained" component="label">
+          Subir CV
+          <input type="file" hidden accept=".pdf,.docx" onChange={handleFileChange} />
         </Button>
         <Modal open={passwordOpen} onClose={handlePasswordClose}>
           <Box sx={{ ...modalStyles }}>
