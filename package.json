@@ -23,7 +23,7 @@
     "yup": "^1.4.0"
   },
   "scripts": {
-    "start": "set HTTPS=true&&set SSL_CRT_FILE=localhost.pem&&set SSL_KEY_FILE=localhost-key.pem&&react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "lint": "eslint 'src/**/*.{js,jsx}'",
     "format": "prettier --write 'src/**/*.{js,jsx}'"
