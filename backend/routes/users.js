@@ -141,11 +141,11 @@ router.post('/upload-cv', auth, upload.single('cv'), async (req, res) => {
 
     // Invocar el script de análisis de CV
     try {
-      const stdout = execFileSync('python', ['parse_cv.py', filePath]);
+      const stdout = execFileSync('/root/miniconda3/envs/altimetrikenv/bin/python', ['parse_cv.py', filePath]);
       
       console.log(stdout);
       const extractedData = JSON.parse(stdout);
-      
+
       console.log("ojo aqui: ", extractedData);
       // Actualizar el perfil del usuario
       user.experience = extractedData.total_experience;
