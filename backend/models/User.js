@@ -24,6 +24,12 @@ const UserSchema = new mongoose.Schema({
   original_cv: {
     type: String,
   },
+  experience: [String],
+  skills: [String],
+  education: [String],
+  certifications: [String],
+  projects: [String],
+  languages: [String],
 });
 
 module.exports = mongoose.model('User', UserSchema);

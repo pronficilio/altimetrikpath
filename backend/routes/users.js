@@ -8,6 +8,7 @@ const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { execFile } = require('child_process');
 
 dotenv.config();
 
@@ -133,9 +134,34 @@ router.post('/upload-cv', auth, upload.single('cv'), async (req, res) => {
   try {
     // Guardar la ruta del archivo en el perfil del usuario
     let user = await User.findById(req.user.id);
-    user.cv = req.file.path;
+    const filePath = req.file.path;
+    user.cv = filePath;
     user.original_cv = req.file.originalname;
     await user.save();
+
+    // Invocar el script de análisis de CV
+    execFile('python', ['parse_cv.py', filePath], async (error, stdout, stderr) => {
+      if (error) {
+        console.error('Error al ejecutar el script de Python:', error);
+        return res.status(500).send('Error al procesar el CV');
+      }
+      console.log(stdout);
+      const extractedData = JSON.parse(stdout);
+      console.log("ojo aqui: ", extractedData);
+      // Actualizar el perfil del usuario
+      user.experience = extractedData.total_experience;
+      user.skills = extractedData.skills;
+      user.education = extractedData.education;
+      user.certifications = extractedData.certifications;
+      user.projects = extractedData.projects;
+      user.languages = extractedData.languages;
+      await user.save();
+
+      res.json({
+        msg: 'CV procesado correctamente',
+        data: extractedData,
+      });
+    });
 
     res.json({ msg: 'CV subido correctamente', path: req.file.path });
   } catch (err) {
