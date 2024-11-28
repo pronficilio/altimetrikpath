@@ -143,10 +143,10 @@ router.post('/upload-cv', auth, upload.single('cv'), async (req, res) => {
     try {
       const stdout = execFileSync('/root/miniconda3/envs/altimetrikenv/bin/python', ['parse_cv.py', filePath]);
       
-      console.log(stdout);
+      // console.log(stdout);
       const extractedData = JSON.parse(stdout);
 
-      console.log("ojo aqui: ", extractedData);
+      // console.log("ojo aqui: ", extractedData);
       // Actualizar el perfil del usuario
       user.experience = extractedData.total_experience;
       user.skills = extractedData.skills;
@@ -156,7 +156,7 @@ router.post('/upload-cv', auth, upload.single('cv'), async (req, res) => {
       user.languages = extractedData.languages;
       await user.save();
 
-      res.json({
+      return res.json({
         msg: 'CV procesado correctamente',
         data: extractedData,
       });
@@ -164,8 +164,6 @@ router.post('/upload-cv', auth, upload.single('cv'), async (req, res) => {
       console.error('Error al ejecutar el script de Python:', error);
       return res.status(500).send('Error al procesar el CV');
     }
-
-    res.json({ msg: 'CV subido correctamente', path: req.file.path });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Error en el servidor');
