@@ -8,7 +8,7 @@ const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { execFile } = require('child_process');
+const { execFileSync } = require('child_process');
 
 dotenv.config();
 
@@ -140,19 +140,18 @@ router.post('/upload-cv', auth, upload.single('cv'), async (req, res) => {
     await user.save();
 
     // Invocar el script de análisis de CV
-    execFile('python', ['parse_cv.py', filePath], async (error, stdout, stderr) => {
-      if (error) {
-        console.error('Error al ejecutar el script de Python:', error);
-        return res.status(500).send('Error al procesar el CV');
-      }
+    try {
+      const stdout = execFileSync('python', ['parse_cv.py', filePath]);
+      
       console.log(stdout);
       const extractedData = JSON.parse(stdout);
+      
       console.log("ojo aqui: ", extractedData);
       // Actualizar el perfil del usuario
       user.experience = extractedData.total_experience;
       user.skills = extractedData.skills;
       user.education = extractedData.education;
-      user.certifications = extractedData.certifications;
+      user.certifications = extractedData.career_path;
       user.projects = extractedData.projects;
       user.languages = extractedData.languages;
       await user.save();
@@ -161,7 +160,10 @@ router.post('/upload-cv', auth, upload.single('cv'), async (req, res) => {
         msg: 'CV procesado correctamente',
         data: extractedData,
       });
-    });
+    } catch (error) {
+      console.error('Error al ejecutar el script de Python:', error);
+      return res.status(500).send('Error al procesar el CV');
+    }
 
     res.json({ msg: 'CV subido correctamente', path: req.file.path });
   } catch (err) {
