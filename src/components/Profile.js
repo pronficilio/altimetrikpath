@@ -15,6 +15,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import 'animate.css';
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -50,7 +51,7 @@ function Profile() {
     }),
     onSubmit: (values) => {
       axios
-        .put('http://localhost:5000/api/users/change-password', values, {
+        .put('http://146.190.175.146:5001/api/users/change-password', values, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           }
@@ -79,7 +80,7 @@ function Profile() {
   const handleUpdate = (event) => {
     event.preventDefault();
     axios
-      .put('http://localhost:5000/api/users', user, {
+      .put('http://146.190.175.146:5001/api/users', user, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         }
@@ -106,8 +107,13 @@ function Profile() {
   const uploadCV = (file) => {
     const formData = new FormData();
     formData.append('cv', file);
+    setSnackbar({
+      open: true,
+      message: 'Analizando el archivo, esto puede tardar un rato...',
+      severity: 'info',
+    });
     axios
-      .post('https://localhost:5443/api/users/upload-cv', formData, {
+      .post('http://146.190.175.146:5001/api/users/upload-cv', formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
@@ -127,6 +133,8 @@ function Profile() {
           message: 'CV subido correctamente',
           severity: 'success',
         });
+        localStorage.setItem('response', JSON.stringify(response.data));
+
       })
       .catch((error) => {
         console.error('Error al subir el CV:', error);
@@ -171,13 +179,14 @@ function Profile() {
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/api/auth', {
+      .get('http://146.190.175.146:5001/api/auth', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         }
       })
       .then((response) => {
         setUser(response.data);
+        console.log(response.data)
       })
       .catch((error) => {
         console.error('Error al obtener el usuario:', error);
@@ -198,6 +207,7 @@ function Profile() {
           backgroundColor: 'white',
           borderRadius: 2,
           boxShadow: 3,
+          textAlign: 'center', // Center the content
         }}
       >
         <Typography variant="h4" gutterBottom>
@@ -205,19 +215,106 @@ function Profile() {
         </Typography>
 
         <Typography variant="h4" gutterBottom>
-          Perfil de Usuario
+          Para iniciar tu análisis, sube tu CV
         </Typography>
 
-        <Button variant="contained" onClick={handleEditOpen}>
-          Editar Información
-        </Button>
-        <Button variant="contained" onClick={handlePasswordOpen} sx={{ mt: 2 }}>
-          Cambiar Contraseña
-        </Button>
-        <Button variant="contained" component="label">
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <Button variant="contained" onClick={handleEditOpen} fullWidth>
+              Editar Información
+            </Button>
+          </Grid>
+          <Grid item xs={6}>
+            <Button variant="contained" onClick={handlePasswordOpen} fullWidth>
+              Cambiar Contraseña
+            </Button>
+          </Grid>
+        </Grid>
+        <Button
+          variant="contained"
+          component="label"
+          sx={{ mt: 2 }}
+          className="animate__animated animate__pulse animate__infinite"
+        >
           Subir CV
           <input type="file" hidden accept=".pdf,.docx" onChange={handleFileChange} />
         </Button>
+        {user.original_cv && (
+          <Box>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body1">
+                <strong>CV Subido:</strong> {user.original_cv}
+              </Typography>
+            </Box>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body1">
+                <strong>Certificaciones:</strong>
+              </Typography>
+              {user.certifications && user.certifications.length > 0 ? (
+                <ul>
+                  {Object.keys(user.certifications[0].current).map((cert, index) => (
+                    <li key={index}>
+                      <strong>{cert}</strong>
+                      <ul>
+                        {Object.entries(user.certifications[0].current[cert]).map(([level, value]) => (
+                          <li key={level}>{level}: {value}</li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <Typography variant="body2">No hay datos disponibles.</Typography>
+              )}
+              <p>----------------------------------------------</p>
+              {user.certifications && user.certifications.length > 0 ? (
+                <ul>
+                  <li>
+                    <Typography variant="body1">
+                      <strong>Lenguajes Faltantes:</strong>
+                    </Typography>
+                  </li>
+                  {Object.keys(user.certifications[0].missing_languages).map((cert, index) => (
+                    <li key={index}>
+                      <strong>{cert}</strong>
+                      <ul>
+                        {Object.entries(user.certifications[0].missing_languages[cert]).map(([level, value]) => (
+                          <li key={level}>{level}: {value}</li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <Typography variant="body2">No hay datos disponibles.</Typography>
+              )}
+              <p>----------------------------------</p>
+              {user.certifications && user.certifications.length > 0 ? (
+                <ul>
+                  <li>
+                    <Typography variant="body1">
+                      <strong>Lenguajes Faltantes:</strong>
+                    </Typography>
+                  </li>
+                  {Object.keys(user.certifications[0].missing_skills).map((cert, index) => (
+                    <li key={index}>
+                      <strong>{cert}</strong>
+                      <ul>
+                        {Object.entries(user.certifications[0].missing_skills[cert]).map(([level, value]) => (
+                          <li key={level}>{level}: {value}</li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <Typography variant="body2">No hay datos disponibles.</Typography>
+              )}
+              
+            </Box>
+          </Box>
+
+        )}
         <Modal open={passwordOpen} onClose={handlePasswordClose}>
           <Box sx={{ ...modalStyles }}>
             <Typography variant="h6">Cambiar Contraseña</Typography>
@@ -308,7 +405,7 @@ function Profile() {
         </Modal>
 
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          {/* <Grid item xs={12}>
             <Typography variant="body1">
               <strong>Nombre:</strong> {user.name}
             </Typography>
@@ -317,7 +414,8 @@ function Profile() {
             <Typography variant="body1">
               <strong>Correo:</strong> {user.email}
             </Typography>
-          </Grid>
+          </Grid> */}
+          <hr/>
           <Grid item xs={12}>
             <Button
               variant="contained"

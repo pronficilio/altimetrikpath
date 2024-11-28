@@ -13,6 +13,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 function Register() {
   const navigate = useNavigate();
+  
   const formik = useFormik({
     initialValues: {
       name: '',
@@ -30,7 +31,7 @@ function Register() {
     }),
     onSubmit: (values) => {
       axios
-        .post('http://localhost:5000/api/users', values)
+        .post("http://146.190.175.146:5001/api/users", values)
         .then((response) => {
           const token = response.data.token; // JWT recibido
           localStorage.setItem('token', token); // Guardar token en localStorage

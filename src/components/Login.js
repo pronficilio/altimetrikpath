@@ -32,7 +32,7 @@ function Login() {
       console.log("Iniciando sesión con:", values);
       // Lógica para manejar el inicio de sesión
       axios
-        .post('http://localhost:5000/api/auth/login', values)
+        .post('http://146.190.175.146:5001/api/auth/login', values)
         .then((response) => {
           const token = response.data.token; // Obtener el token
           localStorage.setItem('token', token); // Guardar el token
