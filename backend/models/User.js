@@ -27,7 +27,7 @@ const UserSchema = new mongoose.Schema({
   experience: [String],
   skills: [String],
   education: [String],
-  certifications: [String],
+  certifications: [Object],
   projects: [String],
   languages: [String],
 });
