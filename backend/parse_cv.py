@@ -255,14 +255,14 @@ clientOpenAI = OpenAI(
     api_key = os.getenv("OPENAI_API_KEY")
 )
 
-nltk.download('stopwords', quiet=True)
-nltk.download('punkt', quiet=True)
+# nltk.download('stopwords', quiet=True)
+# nltk.download('punkt', quiet=True)
 
 # Verificar si el modelo 'en_core_web_sm' está instalado
-try:
-    spacy.load('en_core_web_sm')
-except OSError:
-    download('en_core_web_sm', quiet=True)
+# try:
+#     spacy.load('en_core_web_sm')
+# except OSError:
+#     download('en_core_web_sm', quiet=True)
 
 def main():
     file_path = sys.argv[1]
@@ -281,7 +281,7 @@ def main():
         "company_names": data.get("company_names"),
         "no_of_pages": data.get("no_of_pages"),
         "total_experience": data.get("total_experience"),
-        "gpt_response": None
+        "career_path": None,
     }
 
     # Initialize the conversation
