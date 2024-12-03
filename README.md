@@ -1,70 +1,111 @@
-# Getting Started with Create React App
+"""
+# AltiMetrikPath
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+AltiMetrikPath es una aplicación web diseñada para ayudar a los empleados a generar planes de carrera personalizados basados en su perfil individual. A través del análisis del CV del usuario y mediante el uso de inteligencia artificial, la aplicación proporciona recomendaciones para establecer un plan de nivelación y crecimiento profesional.
 
-## Available Scripts
+Montado en: http://146.190.175.146:3000/
 
-In the project directory, you can run:
+## Características
 
-### `npm start`
+- **Registro e Inicio de Sesión**: Los usuarios pueden crear una cuenta y acceder de forma segura a sus perfiles.
+- **Perfil de Usuario**: Visualización y edición de información personal, incluyendo la carga de CV.
+- **Carga y Análisis de CV**: Los usuarios pueden subir su CV en formato PDF o DOCX. El sistema extrae información relevante utilizando `ResumeParser` y modelos de IA.
+- **Generación de Plan de Carrera**: Basado en los datos extraídos del CV y con la ayuda de ChatGPT, la aplicación sugiere rutas de carrera y niveles adecuados para el usuario.
+- **Seguridad**: Autenticación segura utilizando JWT, encriptación de contraseñas y manejo seguro de datos sensibles.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Tecnologías Utilizadas
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Frontend**:
+  - React.js con Material-UI para la interfaz de usuario.
+  - Formik y Yup para la gestión y validación de formularios.
+  - Axios para las solicitudes HTTP.
+- **Backend**:
+  - Node.js y Express para el servidor.
+  - MongoDB y Mongoose para la base de datos.
+  - Bcrypt.js para encriptación de contraseñas.
+  - Jsonwebtoken para autenticación JWT.
+  - Multer para manejo de cargas de archivos.
+  - Python y PyResparser para la extracción de datos del CV.
+  - OpenAI API para interacción con ChatGPT.
 
-### `npm test`
+## Script principal
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+La función en backend/parse_cv.py analiza los elementos de position en tres categorías: tools, programmingLanguages y skillsResponsibilities. Para cada categoría, realiza las siguientes acciones:
 
-### `npm run build`
+- Incrementa `total_items` si el elemento no es opcional.
+- Compara cada elemento con las coincidencias en los diccionarios correspondientes (`tools_matches`, `languages_matches`, `skills_matches`).
+    - Si hay una coincidencia explícita, suma 1 al `total_score`.
+    - Si hay una coincidencia implícita, suma 0.8 al `total_score`.
+    - Si hay una coincidencia probable, suma 0.5 al `total_score`.
+    - Si no hay coincidencia, agrega el elemento a `missing_tools`, `missing_languages` o `missing_skills` según corresponda.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+En resumen, la función calcula una puntuación total que representa el grado de coincidencia entre las habilidades del candidato y los requisitos del puesto, almacenando también las habilidades faltantes.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Instalación y Ejecución
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# Clonar el repositorio
+```bash
+git clone https://github.com/tu-usuario/altimetrikpath.git
+```
 
-### `npm run eject`
+# Entrar al directorio del frontend
+```bash
+cd altimetrikpath
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+# Instalar dependencias del frontend
+```bash
+npm install
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# Iniciar el servidor de desarrollo del frontend
+```bash
+npm start
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+# En otra terminal, entrar al directorio del backend
+```bash
+cd backend
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+# Instalar dependencias del backend
+```bash
+npm install
+```
 
-## Learn More
+# Configurar variables de entorno en backend/.env
+# MONGO_URI, JWT_SECRET, OPENAI_API_KEY
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# Instalar dependencias de Python para el análisis del CV
+```bash
+pip install pyresparser spacy
+python -m spacy download en_core_web_sm
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# Iniciar el servidor del backend
+```bash
+node server.js
+```
 
-### Code Splitting
+## Uso
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+1. **Registro**: Crear una cuenta proporcionando nombre, correo electrónico y contraseña.
+2. **Inicio de Sesión**: Acceder con las credenciales registradas.
+3. **Perfil**: Completar o actualizar información personal.
+4. **Carga de CV**: Subir el CV en formato PDF o DOCX.
+5. **Análisis de CV**: El sistema procesará el CV y extraerá información relevante.
+6. **Generación de Plan de Carrera**: Basado en el análisis, el sistema sugerirá un plan de carrera y nivelación.
 
-### Analyzing the Bundle Size
+## Estructura del Proyecto
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- **/frontend**: Código fuente del frontend en React.
+- **/backend**: Código fuente del backend en Node.js y Express.
+- **/backend/parse_cv.py**: Script en Python para analizar el CV.
 
-### Making a Progressive Web App
+## Contribución
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Las contribuciones son bienvenidas. Por favor, crea una rama nueva para tus cambios y envía un pull request.
 
-### Advanced Configuration
+## Licencia
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Este proyecto está bajo la Licencia MIT.
